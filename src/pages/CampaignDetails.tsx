@@ -21,8 +21,6 @@ const CampaignDetails: React.FC = () => {
       alert("Please connect your wallet first");
       return;
     }
-
-    // Add your smart contract interaction here
     console.log(`Donating ${donationAmount} ETH to campaign ${id}`);
   };
 
