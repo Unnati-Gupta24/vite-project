@@ -1,12 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useCampaigns } from "../context/CampaignContext";
+import NeonDonationBanner from "../components/NeonDonationBanner";
+import Footer from "../components/Footer";
 
 const Home: React.FC = () => {
   const { campaigns } = useCampaigns();
 
   return (
     <div>
+        <NeonDonationBanner />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {campaigns.map((campaign) => (
           <Link
@@ -46,6 +49,7 @@ const Home: React.FC = () => {
           </Link>
         ))}
       </div>
+      <Footer />
     </div>
   );
 };
