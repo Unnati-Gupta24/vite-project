@@ -42,7 +42,6 @@ const Layout: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mobile menu button */}
             <div className="flex items-center md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -56,7 +55,6 @@ const Layout: React.FC = () => {
               </button>
             </div>
 
-            {/* Desktop navigation */}
             <div className="hidden md:flex items-center space-x-4">
               <NavLinks />
               <WalletButton
@@ -68,8 +66,6 @@ const Layout: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Mobile navigation */}
         {isMenuOpen && (
           <div className="md:hidden p-4 border-t border-cyber-primary/30">
             <div className="flex flex-col space-y-4">
@@ -91,7 +87,6 @@ const Layout: React.FC = () => {
   );
 };
 
-// Separate component for navigation links
 const NavLinks = () => (
   <>
     <Link
@@ -118,7 +113,6 @@ const NavLinks = () => (
   </>
 );
 
-// Separate component for wallet button
 const WalletButton = ({
   handleWalletClick,
   isLoading,
