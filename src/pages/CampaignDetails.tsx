@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 import { parseEther } from "viem";
 import { useCampaigns } from "../context/CampaignContext";
 
@@ -9,6 +9,10 @@ const CampaignDetails: React.FC = () => {
   const { campaigns } = useCampaigns();
   const { address, isConnected } = useAccount();
   const [donationAmount, setDonationAmount] = useState("");
+  const [isTransacting, setIsTransacting] = useState(false);
+
+  // The fixed recipient address
+  const RECIPIENT_ADDRESS = "0x4caBd60046B96B2b5c81b43F05d82cF87a28FFB0";
 
   const campaign = campaigns.find((c) => c.id === id);
 
@@ -21,7 +25,53 @@ const CampaignDetails: React.FC = () => {
       alert("Please connect your wallet first");
       return;
     }
-    console.log(`Donating ${donationAmount} ETH to campaign ${id}`);
+
+    if (!donationAmount || parseFloat(donationAmount) <= 0) {
+      alert("Please enter a valid donation amount");
+      return;
+    }
+
+    try {
+      setIsTransacting(true);
+
+      // Use the ethereum object from window to send the transaction
+      const provider = window.ethereum;
+
+      if (!provider) {
+        alert(
+          "No Ethereum wallet detected. Please install MetaMask or another wallet."
+        );
+        setIsTransacting(false);
+        return;
+      }
+
+      // Request account access if needed
+      await provider.request({ method: "eth_requestAccounts" });
+
+      // Create the transaction parameters
+      const transactionParameters = {
+        to: RECIPIENT_ADDRESS,
+        from: address, // User's address from wagmi
+        value: "0x" + (parseFloat(donationAmount) * 10 ** 18).toString(16), // Convert ETH to Wei in hex
+      };
+
+      // Send the transaction
+      const txHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transactionParameters],
+      });
+
+      console.log(`Transaction sent! Hash: ${txHash}`);
+      alert(
+        `Thank you for your donation of ${donationAmount} ETH to campaign ${campaign.title}`
+      );
+      setDonationAmount("");
+    } catch (error) {
+      console.error("Error making donation:", error);
+      alert("Transaction failed. Please try again.");
+    } finally {
+      setIsTransacting(false);
+    }
   };
 
   return (
@@ -69,17 +119,22 @@ const CampaignDetails: React.FC = () => {
               className="flex-1 p-2 rounded-lg bg-cyber-darker border border-cyber-primary/30 text-white focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary"
               min="0"
               step="0.01"
+              disabled={isTransacting}
             />
             <button
               onClick={handleDonate}
-              disabled={!isConnected || !donationAmount}
+              disabled={!isConnected || !donationAmount || isTransacting}
               className={`px-6 py-2 rounded-lg ${
-                isConnected
+                isConnected && !isTransacting
                   ? "bg-cyber-primary hover:shadow-neon transition-all duration-300"
                   : "bg-gray-600 cursor-not-allowed"
               }`}
             >
-              {isConnected ? "Donate" : "Connect Wallet to Donate"}
+              {isTransacting
+                ? "Processing..."
+                : isConnected
+                ? "Donate"
+                : "Connect Wallet to Donate"}
             </button>
           </div>
         </div>
